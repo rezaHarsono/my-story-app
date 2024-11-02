@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Story App</string>
+    <string name="welcome_login">Welcome, \nPlease login using your account.</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="btn_login">Login</string>
+    <string name="welcome_regist">Welcome, \nPlease register yourself.</string>
+    <string name="name">Name</string>
+    <string name="btn_regist">Register</string>
+    <string name="not_regist_yet">Don\'t have an account yet?</string>
+    <string name="language">Language</string>
+    <string name="logout">Logout</string>
+    <string name="camera">Camera</string>
+    <string name="galerry">Gallery</string>
+    <string name="description">Description</string>
+    <string name="upload">Upload</string>
+    <string name="uploadSuccess">Upload success</string>
+    <string name="add_story">Add Story</string>
+    <string name="invalid_email_error">Email is invalid</string>
+    <string name="invalid_password_error">Password must be at least 8 characters or more.</string>
+    <string name="regist_now">Register now</string>
+    <string name="appwidget_text">List Story</string>
+    <string name="app_widget_description">Widget that show lists of stories</string>
+    <string name="empty_text">No Data</string>
+    <string name="preview_image">preview image</string>
+    <string name="detail_image">detail image</string>
+    <string name="image_login">image login</string>
+    <string name="image_item">image item</string>
+    <string name="image_widget">image widget</string>
+    <string name="tv_email">Email</string>
+    <string name="image_regist">image regist</string>
+</resources>

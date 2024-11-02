@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Story App</string>
+    <string name="welcome_login">Selamat Datang, \nSilahkan login menggunakan akun anda.</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="btn_login">Login</string>
+    <string name="welcome_regist">Selamat Datang, \nSilahkan daftarkan diri anda.</string>
+    <string name="name">Nama</string>
+    <string name="btn_regist">Daftar</string>
+    <string name="not_regist_yet">Belum punya akun?</string>
+    <string name="language">Bahasa</string>
+    <string name="logout">Keluar</string>
+    <string name="camera">Kamera</string>
+    <string name="galerry">Galeri</string>
+    <string name="description">Deskripsi</string>
+    <string name="upload">Kirim</string>
+    <string name="uploadSuccess">Upload berhasil</string>
+    <string name="add_story">Tambah Cerita</string>
+    <string name="invalid_email_error">Email tidak valid</string>
+    <string name="invalid_password_error">Password tidak boleh kurang dari 8 karakter</string>
+    <string name="regist_now">Daftar sekarang</string>
+    <string name="appwidget_text">Daftar Cerita</string>
+    <string name="app_widget_description">Widget yang menampilkan daftar cerita</string>
+    <string name="empty_text">Tidak Ada Data</string>
+    <string name="preview_image">preview image</string>
+    <string name="detail_image">detail image</string>
+    <string name="image_login">image login</string>
+    <string name="image_item">image item</string>
+    <string name="image_widget">image widget</string>
+    <string name="tv_email">Email</string>
+    <string name="image_regist">image regist</string>
+</resources>
