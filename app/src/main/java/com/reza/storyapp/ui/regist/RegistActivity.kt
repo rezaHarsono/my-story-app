@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -34,6 +35,22 @@ class RegistActivity : AppCompatActivity() {
         setupView()
         setupAction()
         playAnimation()
+
+        registViewModel.registerResult.observe(this@RegistActivity) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    showLoading(true)
+                }
+                is Result.Success -> {
+                    showLoading(false)
+                    showSuccessDialog()
+                }
+                is Result.Error -> {
+                    showLoading(false)
+                    showSnakebar(result.error)
+                }
+            }
+        }
     }
 
     private fun setupView() {
@@ -55,25 +72,11 @@ class RegistActivity : AppCompatActivity() {
             val password = binding.edRegisterPassword.text.toString()
             val name = binding.edRegisterName.text.toString()
 
-            lifecycleScope.launch {
+            try {
                 registViewModel.register(name, email, password)
-                    .observe(this@RegistActivity) { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                showLoading(true)
-                            }
-
-                            is Result.Success -> {
-                                showLoading(false)
-                                showSuccessDialog()
-                            }
-
-                            is Result.Error -> {
-                                showLoading(false)
-                                showSnakebar(result.error)
-                            }
-                        }
-                    }
+            } catch (e: Exception) {
+                showSnakebar(e.message.toString())
+                Log.e("RegistActivity", "Register failed: ${e.message.toString()}")
             }
         }
     }

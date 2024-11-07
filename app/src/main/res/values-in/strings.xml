@@ -30,4 +30,6 @@
     <string name="image_widget">image widget</string>
     <string name="tv_email">Email</string>
     <string name="image_regist">image regist</string>
+    <string name="login_success_popup">Anda sudah berhasil login.</string>
+    <string name="continue_button">Lanjut</string>
 </resources>

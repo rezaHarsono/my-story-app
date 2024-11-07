@@ -28,5 +28,10 @@
     <string name="image_item">image item</string>
     <string name="image_widget">image widget</string>
     <string name="tv_email">Email</string>
-    <string name="image_regist">image regist</string>
+    <string name="image_regist">image regist</string>)
+    <string name="login_success_popup">Login Success</string>
+    <string name="continue_button">Continue</string>
+    <string name="action_map">Action Map</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="maps">Maps</string>
 </resources>

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
+import com.reza.storyapp.R
 import com.reza.storyapp.ViewModelFactory
 import com.reza.storyapp.data.Result
 import com.reza.storyapp.data.remote.pref.User
@@ -38,7 +39,32 @@ class LoginActivity : AppCompatActivity() {
         setupView()
         setupAction()
         playAnimation()
+
+        loginViewModel.loginResult.observe(this@LoginActivity) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    showLoading(true)
+                }
+
+                is Result.Success -> {
+                    showLoading(false)
+                    val user = User(
+                        result.data.loginResult?.name.toString(),
+                        result.data.loginResult?.token.toString(),
+                    )
+                    loginViewModel.saveSession(user)
+
+                    StoryListWidget.notifyDataSetChanged(this@LoginActivity)
+                    showSuccessDialog()
+                }
+
+                is Result.Error -> {
+                    showError(result.error)
+                }
+            }
+        }
     }
+
 
     private fun setupView() {
         @Suppress("DEPRECATION")
@@ -64,48 +90,30 @@ class LoginActivity : AppCompatActivity() {
             val password = binding.edLoginPassword.text.toString()
 
             try {
-                lifecycleScope.launch {
-                    loginViewModel.login(email, password).observe(this@LoginActivity) { result ->
-                        when (result) {
-                            is Result.Loading -> {
-                                showLoading(true)
-                            }
-
-                            is Result.Success -> {
-                                showLoading(false)
-                                val token = result.data.loginResult?.token
-                                val user = User(email, token ?: "")
-                                lifecycleScope.launch {
-                                    loginViewModel.saveSession(user)
-                                }
-                                StoryListWidget.notifyDataSetChanged(this@LoginActivity)
-                                Log.d("Token", "Token: $token")
-                                showSuccessDialog()
-                            }
-
-                            is Result.Error -> {
-                                showLoading(false)
-                                showSnakebar(result.error)
-                            }
-                        }
-                    }
-                }
+                loginViewModel.login(email, password)
             } catch (e: Exception) {
                 showSnakebar(e.message.toString())
+                Log.d("Login Error", e.message.toString())
             }
         }
     }
 
+    private fun showError(errorMessage: String) {
+        showLoading(false)
+        showSnakebar(errorMessage)
+    }
+
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.btnLogin.isEnabled = !isLoading
+        binding.btnRegistNow.isEnabled = !isLoading
     }
 
     private fun showSuccessDialog() {
-
         AlertDialog.Builder(this).apply {
             setTitle("Yeah!")
-            setMessage("Anda sudah berhasil login.")
-            setPositiveButton("Lanjut") { _, _ ->
+            setMessage(getString(R.string.login_success_popup))
+            setPositiveButton(getString(R.string.continue_button)) { _, _ ->
                 val intent = Intent(this@LoginActivity, StoryActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)

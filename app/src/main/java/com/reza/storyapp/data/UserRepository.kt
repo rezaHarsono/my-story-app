@@ -23,20 +23,20 @@ class UserRepository private constructor(
     private val userPreference: UserPreference
 ) {
 
-    suspend fun login(email: String, password: String): LiveData<Result<LoginResponse>> = liveData {
-        emit(Result.Loading)
-        try {
+    suspend fun login(email: String, password: String): Result<LoginResponse> {
+        return try {
             val response = apiService.login(email, password)
             if (response.error == false) {
-                emit(Result.Success(response))
+                Result.Success(response)
             } else {
-                emit(Result.Error(response.message.toString()))
+                Result.Error(response.message.toString())
             }
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
             val errorResponse = Gson().fromJson(errorBody, LoginResponse::class.java)
-            emit(Result.Error(errorResponse.message.toString()))
-            Log.e("LoginError", "login: ${errorResponse.message}")
+            Result.Error(errorResponse.message.toString())
+        } catch (e: Exception) {
+            Result.Error("An unexpected error occurred: ${e.localizedMessage}")
         }
     }
 
@@ -44,20 +44,21 @@ class UserRepository private constructor(
         name: String,
         email: String,
         password: String
-    ): LiveData<Result<RegisterResponse>> = liveData {
-        emit(Result.Loading)
-        try {
+    ): Result<RegisterResponse> {
+        return try {
             val response = apiService.register(name, email, password)
             if (response.error == false) {
-                emit(Result.Success(response))
+                Result.Success(response)
             } else {
-                emit(Result.Error(response.message.toString()))
+                Result.Error(response.message.toString())
             }
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
             val errorResponse = Gson().fromJson(errorBody, RegisterResponse::class.java)
-            emit(Result.Error(errorResponse.message.toString()))
             Log.e("RegisterError", "register: ${errorResponse.message}")
+            Result.Error(errorResponse.message.toString())
+        } catch (e: Exception) {
+            Result.Error("An unexpected error occurred: ${e.localizedMessage}")
         }
     }
 
@@ -65,6 +66,23 @@ class UserRepository private constructor(
         emit(Result.Loading)
         try {
             val response = apiService.getStories()
+            if (response.error == false) {
+                emit(Result.Success(response.listStory))
+            } else {
+                emit(Result.Error(response.message.toString()))
+            }
+        } catch (e: HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, StoryResponse::class.java)
+            emit(Result.Error(errorResponse.message.toString()))
+            Log.e("StoryError", "getStories: ${errorResponse.message}")
+        }
+    }
+
+    fun getStoriesWithLocation(): LiveData<Result<List<ListStoryItem>>> = liveData {
+        emit(Result.Loading)
+        try {
+            val response = apiService.getStoriesWithLocation()
             if (response.error == false) {
                 emit(Result.Success(response.listStory))
             } else {

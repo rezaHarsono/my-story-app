@@ -20,6 +20,7 @@ import com.reza.storyapp.data.Result
 import com.reza.storyapp.databinding.ActivityStoryBinding
 import com.reza.storyapp.ui.addStory.AddStoryActivity
 import com.reza.storyapp.ui.login.LoginActivity
+import com.reza.storyapp.ui.map.MapsActivity
 import com.reza.storyapp.widget.StoryListWidget
 import kotlinx.coroutines.launch
 
@@ -72,6 +73,11 @@ class StoryActivity : AppCompatActivity() {
 
                     finish()
                 }
+            }
+
+            R.id.action_map -> {
+                val intent = Intent(this@StoryActivity, MapsActivity::class.java)
+                startActivity(intent)
             }
         }
         return super.onOptionsItemSelected(item)
