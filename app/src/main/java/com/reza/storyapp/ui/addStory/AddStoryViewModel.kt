@@ -11,12 +11,18 @@ class AddStoryViewModel(private val repository: UserRepository) : ViewModel() {
     private var _uri: MutableLiveData<Uri?> = MutableLiveData<Uri?>()
     val uri get() = _uri
 
-    suspend fun uploadStory(file: MultipartBody.Part, description: RequestBody) =
-        repository.uploadStory(file, description)
+    suspend fun uploadStory(
+        file: MultipartBody.Part,
+        description: RequestBody,
+        lat: Float?,
+        lon: Float?
+    ) =
+        repository.uploadStory(file, description, lat, lon)
 
     fun getUri(): Uri? = uri.value
 
     fun setUri(uri: Uri?) {
         _uri.value = uri
     }
+
 }

@@ -36,15 +36,20 @@ interface ApiService {
     @POST("stories")
     suspend fun uploadImage(
         @Part file: MultipartBody.Part,
-        @Part("description") description: RequestBody
+        @Part("description") description: RequestBody,
+        @Part("lat") lat: Float?,
+        @Part("lon") lon: Float?
     ): FileUploadResponse
 
     @GET("stories")
-    suspend fun getStories(): StoryResponse
+    suspend fun getStories(
+        @Query("page") page: Int = 1,
+        @Query("size") size: Int = 20
+    ): StoryResponse
 
     @GET("stories/{id}")
-    suspend fun getStoryDetail(
-        @Path("id") id: String?
+    suspend fun getStoriesWithId(
+        @Path("id") id: String
     ): StoryDetailResponse
 
     @GET("stories")

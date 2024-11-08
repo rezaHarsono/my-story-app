@@ -3,20 +3,18 @@ package com.reza.storyapp.ui.story
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.reza.storyapp.R
 import com.reza.storyapp.ViewModelFactory
-import com.reza.storyapp.data.Result
 import com.reza.storyapp.databinding.ActivityStoryBinding
 import com.reza.storyapp.ui.addStory.AddStoryActivity
 import com.reza.storyapp.ui.login.LoginActivity
@@ -27,8 +25,6 @@ import kotlinx.coroutines.launch
 class StoryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityStoryBinding
 
-    private val storyAdapter = StoryAdapter()
-
     private val storyViewModel by viewModels<StoryViewModel> {
         ViewModelFactory.getInstance(this)
     }
@@ -37,6 +33,10 @@ class StoryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityStoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        storyViewModel.isLoading.observe(this) {
+            showLoading(it)
+        }
 
         setupView()
         setupAction()
@@ -104,35 +104,27 @@ class StoryActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        storyViewModel.getStories().observe(this@StoryActivity) { stories ->
-            if (stories != null) {
-                when (stories) {
-                    is Result.Loading -> {
-                        showLoading(true)
-                    }
 
-                    is Result.Success -> {
-                        showLoading(false)
-                        val storyList = stories.data
-                        storyAdapter.submitList(storyList)
-                        Log.d("StoryActivity", "onCreate: fetch success")
-                    }
+        val adapter = StoryAdapter()
+        binding.rvStories.adapter = adapter.withLoadStateFooter(
+            footer = LoadingStateAdapter {
+                adapter.retry()
+            }
+        )
 
-                    is Result.Error -> {
-                        showLoading(false)
-                        Toast.makeText(this@StoryActivity, stories.error, Toast.LENGTH_SHORT).show()
-                        Log.e("StoryActivity", "onCreate: fetch error")
-                    }
+        storyViewModel.getStories().observe(this) { result ->
+            adapter.submitData(lifecycle, result)
+        }
 
+        binding.rvStories.layoutManager = LinearLayoutManager(this)
+
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    binding.rvStories.layoutManager?.scrollToPosition(0)
                 }
             }
-        }
-
-        binding.rvStories.apply {
-            layoutManager = LinearLayoutManager(context)
-            setHasFixedSize(true)
-            adapter = storyAdapter
-        }
+        })
     }
 
     private fun showLoading(isLoading: Boolean) {

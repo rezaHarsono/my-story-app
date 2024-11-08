@@ -12,13 +12,11 @@ import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.reza.storyapp.ViewModelFactory
 import com.reza.storyapp.data.Result
 import com.reza.storyapp.databinding.ActivityRegistBinding
 import com.reza.storyapp.ui.login.LoginActivity
-import kotlinx.coroutines.launch
 
 class RegistActivity : AppCompatActivity() {
     private val registViewModel by viewModels<RegistViewModel> {

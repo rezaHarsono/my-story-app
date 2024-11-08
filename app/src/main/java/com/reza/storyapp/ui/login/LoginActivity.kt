@@ -12,7 +12,6 @@ import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import com.reza.storyapp.R
 import com.reza.storyapp.ViewModelFactory
@@ -22,7 +21,6 @@ import com.reza.storyapp.databinding.ActivityLoginBinding
 import com.reza.storyapp.ui.regist.RegistActivity
 import com.reza.storyapp.ui.story.StoryActivity
 import com.reza.storyapp.widget.StoryListWidget
-import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -111,7 +109,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showSuccessDialog() {
         AlertDialog.Builder(this).apply {
-            setTitle("Yeah!")
+            setTitle(getString(R.string.login_success_title))
             setMessage(getString(R.string.login_success_popup))
             setPositiveButton(getString(R.string.continue_button)) { _, _ ->
                 val intent = Intent(this@LoginActivity, StoryActivity::class.java)

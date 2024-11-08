@@ -3,7 +3,14 @@ package com.reza.storyapp.data
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.liveData
 import com.google.gson.Gson
+import com.reza.storyapp.data.local.StoryEntity
+import com.reza.storyapp.data.local.StoryRoomDatabase
 import com.reza.storyapp.data.remote.pref.User
 import com.reza.storyapp.data.remote.pref.UserPreference
 import com.reza.storyapp.data.remote.response.FileUploadResponse
@@ -19,8 +26,9 @@ import okhttp3.RequestBody
 import retrofit2.HttpException
 
 class UserRepository private constructor(
+    private val storyDatabase: StoryRoomDatabase,
     private val apiService: ApiService,
-    private val userPreference: UserPreference
+    private val userPreference: UserPreference,
 ) {
 
     suspend fun login(email: String, password: String): Result<LoginResponse> {
@@ -62,12 +70,25 @@ class UserRepository private constructor(
         }
     }
 
-    fun getStories(): LiveData<Result<List<ListStoryItem>>> = liveData {
+    fun getStories(): LiveData<PagingData<StoryEntity>> {
+        @OptIn(ExperimentalPagingApi::class)
+        return Pager(
+            config = PagingConfig(
+                pageSize = 5
+            ),
+            remoteMediator = StoryRemoteMediator(storyDatabase, apiService),
+            pagingSourceFactory = {
+                storyDatabase.storyDao().getStories()
+            }
+        ).liveData
+    }
+
+    fun getStoriesWithId(id: String): LiveData<Result<Story?>> = liveData {
         emit(Result.Loading)
         try {
-            val response = apiService.getStories()
+            val response = apiService.getStoriesWithId(id)
             if (response.error == false) {
-                emit(Result.Success(response.listStory))
+                emit(Result.Success(response.story))
             } else {
                 emit(Result.Error(response.message.toString()))
             }
@@ -96,31 +117,16 @@ class UserRepository private constructor(
         }
     }
 
-    fun getStoryById(id: String?): LiveData<Result<Story?>> = liveData {
-        emit(Result.Loading)
-        try {
-            val response = apiService.getStoryDetail(id)
-            if (response.error == false) {
-                emit(Result.Success(response.story))
-            } else {
-                emit(Result.Error(response.message.toString()))
-            }
-        } catch (e: HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            val errorResponse = Gson().fromJson(errorBody, StoryResponse::class.java)
-            emit(Result.Error(errorResponse.message.toString()))
-            Log.e("StoryError", "getStoryById: ${errorResponse.message}")
-        }
-    }
-
     suspend fun uploadStory(
         file: MultipartBody.Part,
-        description: RequestBody
+        description: RequestBody,
+        lat: Float? = null,
+        lon: Float? = null
     ): LiveData<Result<FileUploadResponse>> =
         liveData {
             emit(Result.Loading)
             try {
-                val response = apiService.uploadImage(file, description)
+                val response = apiService.uploadImage(file, description, lat, lon)
                 if (response.error == false) {
                     emit(Result.Success(response))
                 } else {
@@ -151,8 +157,9 @@ class UserRepository private constructor(
     companion object {
 
         fun getInstance(
+            storyDatabase: StoryRoomDatabase,
             apiService: ApiService,
-            userPreference: UserPreference
-        ) = UserRepository(apiService, userPreference)
+            userPreference: UserPreference,
+        ) = UserRepository(storyDatabase ,apiService, userPreference)
     }
 }

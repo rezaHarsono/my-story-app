@@ -45,7 +45,7 @@ class DetailActivity : AppCompatActivity() {
 
     private fun setupContent() {
         val storyId = intent.getStringExtra(STORY_ID_KEY)
-        detailViewModel.getStoryById(storyId).observe(this) { result ->
+        detailViewModel.getStoryById(storyId!!).observe(this) { result ->
             when (result) {
                 is Result.Success -> {
                     showLoading(false)

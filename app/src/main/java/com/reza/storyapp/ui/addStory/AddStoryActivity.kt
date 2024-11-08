@@ -1,6 +1,9 @@
 package com.reza.storyapp.ui.addStory
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,7 +15,10 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.reza.storyapp.R
 import com.reza.storyapp.ViewModelFactory
@@ -36,6 +42,13 @@ class AddStoryActivity : AppCompatActivity() {
         ViewModelFactory.getInstance(this)
     }
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) {
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddStoryBinding.inflate(layoutInflater)
@@ -49,6 +62,8 @@ class AddStoryActivity : AppCompatActivity() {
                 binding.ivAddStoryImage.setImageURI(uri)
             }
         }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     private fun setupView() {
@@ -73,65 +88,8 @@ class AddStoryActivity : AppCompatActivity() {
                 startGallery()
             }
             btnAdd.setOnClickListener {
-                uploadImage()
+                uploadStory()
             }
-        }
-    }
-
-    private fun uploadImage() {
-        addStoryViewModel.uri.observe(this) { uri ->
-            uri?.let {
-                val imageFile = uriToFile(uri, this).reduceFileImage()
-                Log.d("Image File", "Image File: ${imageFile.path}")
-                val description = binding.edAddDescription.text.toString()
-                showLoading(true)
-
-                val requestBody = description.toRequestBody("text/plain".toMediaType())
-                val requestImageFile = imageFile.asRequestBody("image/jpeg".toMediaType())
-                val multipartBody = MultipartBody.Part.createFormData(
-                    "photo",
-                    imageFile.name,
-                    requestImageFile
-                )
-                lifecycleScope.launch {
-                    addStoryViewModel.uploadStory(multipartBody, requestBody)
-                        .observe(this@AddStoryActivity) { result ->
-                            if (result != null) {
-                                when (result) {
-                                    is Result.Success -> {
-                                        showLoading(false)
-                                        showSnackbar(getString(R.string.uploadSuccess))
-                                        StoryListWidget.notifyDataSetChanged(this@AddStoryActivity.applicationContext)
-
-                                        val intent =
-                                            Intent(this@AddStoryActivity, StoryActivity::class.java)
-                                        intent.flags =
-                                            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                                        startActivity(intent)
-
-                                        Log.d(
-                                            "AddStoryActivity",
-                                            "uploadImage: ${result.data.message}"
-                                        )
-                                        finish()
-                                    }
-
-                                    is Result.Error -> {
-                                        showLoading(false)
-                                        showSnackbar(result.error)
-                                        Log.e("AddStoryActivity", "uploadImage: ${result.error}")
-                                    }
-
-                                    is Result.Loading -> {
-                                        showLoading(true)
-                                    }
-
-                                }
-                            }
-                        }
-                }
-            }
-
         }
     }
 
@@ -163,6 +121,91 @@ class AddStoryActivity : AppCompatActivity() {
         }
         if (!isSuccess) {
             addStoryViewModel.setUri(null)
+        }
+    }
+
+    private fun checkLocationPermissionAndGetLocation(callback: (Location?) -> Unit) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.lastLocation.addOnCompleteListener(this) {
+                val location: Location? = it.result
+                callback(location)
+            }
+        } else {
+            requestPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    private fun uploadStory() {
+        val includeLocation = binding.switchLocation.isChecked
+
+        if (includeLocation) {
+            checkLocationPermissionAndGetLocation { location ->
+                if (location != null) {
+                    handleUploadStory(location.latitude.toFloat(), location.longitude.toFloat())
+                } else {
+                    showSnackbar(ContextCompat.getString(this, R.string.location_not_found))
+                }
+            }
+        } else {
+            handleUploadStory()
+        }
+        StoryListWidget.notifyDataSetChanged(this@AddStoryActivity)
+    }
+
+    private fun handleUploadStory(lat: Float? = null, long: Float? = null) {
+        addStoryViewModel.uri.observe(this) { uri ->
+            uri?.let {
+                val description = binding.edAddDescription.text.toString()
+                val requestBody = description.toRequestBody("text/plain".toMediaType())
+                val imageFile = uriToFile(uri, this).reduceFileImage()
+                val requestImageFile = imageFile.asRequestBody("image/jpeg".toMediaType())
+                val multipartBody = MultipartBody.Part.createFormData(
+                    "photo",
+                    imageFile.name,
+                    requestImageFile,
+                )
+                lifecycleScope.launch {
+                    addStoryViewModel.uploadStory(multipartBody, requestBody, lat, long)
+                        .observe(this@AddStoryActivity) { result ->
+                            if (result != null) {
+                                when (result) {
+                                    is Result.Success -> {
+                                        showLoading(false)
+                                        showSnackbar(getString(R.string.uploadSuccess))
+                                        val intent = Intent(this@AddStoryActivity, StoryActivity::class.java)
+                                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                                        startActivity(intent)
+                                        finish()
+                                    }
+
+                                    is Result.Error -> {
+                                        showLoading(false)
+                                        showSnackbar(result.error)
+                                    }
+
+                                    is Result.Loading -> {
+                                        showLoading(true)
+                                    }
+                                }
+                            }
+                        }
+                }
+                Log.d("Image File", "Image File: ${imageFile.path}")
+            }
+
         }
     }
 

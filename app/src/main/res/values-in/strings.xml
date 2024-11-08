@@ -32,4 +32,11 @@
     <string name="image_regist">image regist</string>
     <string name="login_success_popup">Anda sudah berhasil login.</string>
     <string name="continue_button">Lanjut</string>
+    <string name="action_map">Action Map</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="maps">Peta</string>
+    <string name="retry">Coba Lagi</string>
+    <string name="location_not_found">Lokasi Tidak Ditemukan</string>
+    <string name="send_location">Kirim Lokasi</string>
+    <string name="login_success_title">Selamat!</string>
 </resources>
