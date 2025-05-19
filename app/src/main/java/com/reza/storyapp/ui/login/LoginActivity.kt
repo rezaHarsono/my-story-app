@@ -16,7 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.reza.storyapp.R
 import com.reza.storyapp.ViewModelFactory
 import com.reza.storyapp.data.Result
-import com.reza.storyapp.data.remote.pref.User
+import com.reza.storyapp.data.local.pref.User
 import com.reza.storyapp.databinding.ActivityLoginBinding
 import com.reza.storyapp.ui.regist.RegistActivity
 import com.reza.storyapp.ui.story.StoryActivity

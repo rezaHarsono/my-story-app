@@ -1,4 +1,4 @@
-package com.reza.storyapp.data.remote.pref
+package com.reza.storyapp.data.local.pref
 
 data class User(
     val email: String,

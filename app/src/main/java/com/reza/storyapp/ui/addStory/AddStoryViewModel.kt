@@ -11,7 +11,7 @@ class AddStoryViewModel(private val repository: UserRepository) : ViewModel() {
     private var _uri: MutableLiveData<Uri?> = MutableLiveData<Uri?>()
     val uri get() = _uri
 
-    suspend fun uploadStory(
+    fun uploadStory(
         file: MultipartBody.Part,
         description: RequestBody,
         lat: Float?,

@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.reza.storyapp.data.Result
 import com.reza.storyapp.data.UserRepository
-import com.reza.storyapp.data.remote.pref.User
+import com.reza.storyapp.data.local.pref.User
 import com.reza.storyapp.data.remote.response.LoginResponse
 import kotlinx.coroutines.launch
 

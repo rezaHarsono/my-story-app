@@ -11,8 +11,8 @@ import androidx.paging.liveData
 import com.google.gson.Gson
 import com.reza.storyapp.data.local.StoryEntity
 import com.reza.storyapp.data.local.StoryRoomDatabase
-import com.reza.storyapp.data.remote.pref.User
-import com.reza.storyapp.data.remote.pref.UserPreference
+import com.reza.storyapp.data.local.pref.User
+import com.reza.storyapp.data.local.pref.UserPreference
 import com.reza.storyapp.data.remote.response.FileUploadResponse
 import com.reza.storyapp.data.remote.response.ListStoryItem
 import com.reza.storyapp.data.remote.response.LoginResponse
@@ -34,6 +34,13 @@ class UserRepository private constructor(
     suspend fun login(email: String, password: String): Result<LoginResponse> {
         return try {
             val response = apiService.login(email, password)
+            saveSession(
+                User(
+                    email = email,
+                    token = response.loginResult?.token ?: "",
+                    isLogin = true
+                )
+            )
             if (response.error == false) {
                 Result.Success(response)
             } else {
@@ -117,7 +124,7 @@ class UserRepository private constructor(
         }
     }
 
-    suspend fun uploadStory(
+    fun uploadStory(
         file: MultipartBody.Part,
         description: RequestBody,
         lat: Float? = null,
@@ -155,7 +162,6 @@ class UserRepository private constructor(
 
 
     companion object {
-
         fun getInstance(
             storyDatabase: StoryRoomDatabase,
             apiService: ApiService,

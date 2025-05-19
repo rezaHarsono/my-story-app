@@ -8,8 +8,8 @@ import android.widget.RemoteViewsService
 import androidx.core.os.bundleOf
 import com.bumptech.glide.Glide
 import com.reza.storyapp.R
-import com.reza.storyapp.data.remote.pref.UserPreference
-import com.reza.storyapp.data.remote.pref.dataStore
+import com.reza.storyapp.data.local.pref.UserPreference
+import com.reza.storyapp.data.local.pref.dataStore
 import com.reza.storyapp.data.remote.response.ListStoryItem
 import com.reza.storyapp.data.remote.retrofit.ApiService
 import com.reza.storyapp.di.Injection

@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatEditText
 import com.reza.storyapp.R
 
-class MyEmailEditText @JvmOverloads constructor(
+class   MyEmailEditText @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : AppCompatEditText(context, attrs) {
     private val regexEmail = "^[A-Za-z0-9+_.-]+@(.+)\$".toRegex()
